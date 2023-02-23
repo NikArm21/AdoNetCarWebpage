@@ -12,6 +12,7 @@ builder.Services.AddControllersWithViews();
 
 //amen angam nor
 builder.Services.AddTransient<ICarRepository, CarRepository>();
+builder.Services.AddTransient<IPersonRepository, PersonRepository>();
 
 var app = builder.Build();
 

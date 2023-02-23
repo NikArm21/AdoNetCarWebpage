@@ -1,4 +1,5 @@
 ﻿using AdoNetCarWebpage.Models;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace AdoNetCarWebpage.Repository
@@ -10,31 +11,67 @@ namespace AdoNetCarWebpage.Repository
             List<Car>  list = new List<Car>();   
             string connectionString = @"Data Source=(LocalDb)\MSSqlLocalDB;Initial Catalog=GarageDB;Integrated Security=True";
 
-            string sqlExpression = "SELECT * FROM Car";
+            string sql = "SELECT * FROM Car";
+            //using (SqlConnection connection = new SqlConnection(connectionString))
+            //{
+            //    connection.Open();
+            //    SqlCommand command = new SqlCommand(sqlExpression, connection);
+            //    SqlDataReader reader = await command.ExecuteReaderAsync();
+
+            //    if (reader.HasRows) // если есть данные
+            //    {
+
+
+            //        while (reader.Read()) // построчно считываем данные
+            //        {
+            //            Car car = new Car();
+            //            car.Id = (int)reader.GetValue(reader.GetOrdinal("Id"));
+            //            car.Brand =(string) reader.GetValue(reader.GetOrdinal("Brand"));
+            //            car.Model = (string)reader.GetValue(reader.GetOrdinal("Model"));
+            //            car.Year = (int)reader.GetValue(reader.GetOrdinal("Year"));
+            //            car.HorsePower = (int)reader.GetValue(reader.GetOrdinal("HorsePower"));
+            //            car.Price = (decimal)reader.GetValue(reader.GetOrdinal("Price"));
+            //            list.Add(car);
+            //        }
+            //    }
+
+            //    reader.Close();
+            //}
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-                SqlDataReader reader = await command.ExecuteReaderAsync();
+                SqlDataAdapter adapter = new SqlDataAdapter(sql, connection);
 
-                if (reader.HasRows) // если есть данные
+                DataSet ds = new DataSet();
+                adapter.Fill(ds);
+                // перебор всех таблиц
+                foreach (DataTable dt in ds.Tables)
                 {
-                  
-
-                    while (reader.Read()) // построчно считываем данные
+                    Console.WriteLine(dt.TableName); // название таблицы
+                                                     // перебор всех столбцов
+                    foreach (DataColumn column in dt.Columns)
+                        Console.Write("\t{0}", column.ColumnName);
+                    Console.WriteLine();
+                    // перебор всех строк таблицы
+                    foreach (DataRow row in dt.Rows)
                     {
+                        // получаем все ячейки строки
+                        var cells = row.ItemArray;
+
                         Car car = new Car();
-                        car.Id = (int)reader.GetValue(reader.GetOrdinal("Id"));
-                        car.Brand =(string) reader.GetValue(reader.GetOrdinal("Brand"));
-                        car.Model = (string)reader.GetValue(reader.GetOrdinal("Model"));
-                        car.Year = (int)reader.GetValue(reader.GetOrdinal("Year"));
-                        car.HorsePower = (int)reader.GetValue(reader.GetOrdinal("HorsePower"));
-                        car.Price = (decimal)reader.GetValue(reader.GetOrdinal("Price"));
+                        car.Id = (int)cells[0];
+                        car.Brand = (string)cells[1];
+                        car.Model = (string)cells[2];
+                        car.Year = (int)cells[3];
+                        car.HorsePower = (int)cells[4];
+                        car.Price = (decimal)cells[5];
                         list.Add(car);
+                        foreach (object cell in cells)
+
+                            Console.Write("\t{0}", cell);
+                        Console.WriteLine();
                     }
                 }
-
-                reader.Close();
             }
             return list;
 
